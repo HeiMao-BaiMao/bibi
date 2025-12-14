@@ -3,6 +3,7 @@
 // --------------------------------------------------------------------------------
 
 @use "sass:math";
+@use "sass:color";
 
 div.bibi-subpanel {
 	&.bibi-subpanel-right, &:not(.bibi-subpanel-left) { right: $Subpanel_Margin; }
@@ -58,9 +59,9 @@ div.bibi-subpanel {
 				@include padding-h($Subpanel-Heading_HorizontalPadding);
 				color: $Subpanel-Heading_Color;
 				>small {
-					color: lighten($Subpanel-Heading_Color, 12%);
+					color: color.adjust($Subpanel-Heading_Color, $lightness: 12%);
 					&:before {
-						color: lighten($Subpanel-Heading_Color, 24%);
+						color: color.adjust($Subpanel-Heading_Color, $lightness: 24%);
 					}
 				}
 			}

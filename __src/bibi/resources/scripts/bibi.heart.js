@@ -886,6 +886,9 @@ L.loadPackage = () => O.openDocument(B.Package.Source).then(L.loadPackage.proces
             Item['rendition:orientation'] = ItemRef['rendition:orientation'] || Metadata['rendition:orientation'];
             Item['rendition:spread']      = ItemRef['rendition:spread']      || Metadata['rendition:spread'];
             Item['rendition:page-spread'] = ItemRef['rendition:page-spread'] || ItemRef['page-spread'] || undefined;
+            // Check if this is a pre-paginated item that might be a portrait image
+            // We'll verify the aspect ratio later when the item is loaded
+            Item['_check-aspect-ratio'] = (Item['rendition:layout'] == 'pre-paginated' && Item['rendition:page-spread']);
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             Item.IndexInSpine = Spine.push(Item) - 1;
             if(ItemRef.getAttribute('linear') == 'no') {
@@ -1291,6 +1294,31 @@ L.postprocessItem = (Item) => {
         else if( /^iframe$/i.test(Lv1Ele.tagName)) Item.Outsourcing =                      true;
         else if(!O.getElementInnerText(Item.Body)) Item.Outsourcing =                      true;
     }
+    
+    // Check aspect ratio for pre-paginated single image items and adjust page-spread
+    if(Item['_check-aspect-ratio'] && (Item.OnlySingleIMG || Item.OnlySingleSVG)) {
+        if(!Item.Viewport) Item.Viewport = R.getItemViewport(Item);
+        if(Item.Viewport) {
+            const aspectRatio = Item.Viewport.Width / Item.Viewport.Height;
+            const w = Item.Viewport.Width;
+            const h = Item.Viewport.Height;
+            
+            // Remove forced page-spread for non-landscape images
+            // Portrait: ratio < 1.0
+            // Near-square: 1.0 <= ratio < 1.5
+            // Landscape: ratio >= 1.5
+            if(aspectRatio < 1.5 && (Item['rendition:page-spread'] == 'left' || Item['rendition:page-spread'] == 'right')) {
+                const oldPageSpread = Item['rendition:page-spread'];
+                delete Item['rendition:page-spread'];
+                Item['_needs-spread-reconstruction'] = true;
+                if(Bibi.Dev) O.log(`Non-landscape image detected (${w}x${h}, ratio=${aspectRatio.toFixed(2)}): Item ${Item.Index}, removing page-spread-${oldPageSpread}`);
+            } else if(aspectRatio >= 1.5) {
+                if(Bibi.Dev) O.log(`Landscape image detected (${w}x${h}, ratio=${aspectRatio.toFixed(2)}): Item ${Item.Index}, keeping spread layout`);
+            }
+        }
+        delete Item['_check-aspect-ratio'];
+    }
+    
     return (Item['rendition:layout'] == 'pre-paginated' ? Promise.resolve() : L.patchItemStyles(Item)).then(() => {
         E.dispatch('bibi:postprocessed-item', Item);
         // Item.stamp('Postprocessed');
@@ -1561,7 +1589,11 @@ R.renderReflowableItem = (Item) => {
     Item.Columned = false, Item.ColumnBreadth = 0, Item.ColumnLength = 0;
     Item.ReversedColumned = false;
     Item.Half = false;
+    // Spread logic based on viewport orientation
+    // Portrait viewport (1 page per spread): Never spread
+    // Landscape viewport (2 pages per spread): Spread if conditions met
     Item.Spreaded = (
+        R.PagesPerSpread == 2 &&
         S.SLA == 'horizontal' && (S['pagination-method'] == 'x' || /-tb$/.test(Item.WritingMode))
             &&
         (Item['rendition:spread'] == 'both' || R.Orientation == Item['rendition:spread'] || R.Orientation == 'landscape')
@@ -1571,6 +1603,7 @@ R.renderReflowableItem = (Item) => {
         if(HalfL >= Math.floor(PageCB * S['orientation-border-ratio'] / 2)) PageCL = HalfL;
         else Item.Spreaded = false;
     }
+    if(Bibi.Dev && Item.Index == 0) O.log(`Reflowable spread mode: ${Item.Spreaded} (PagesPerSpread: ${R.PagesPerSpread}, Orientation: ${R.Orientation})`);
     sML.style(Item, {
         [C.L_SIZE_b]: PageCB + 'px',
         [C.L_SIZE_l]: PageCL + 'px'
@@ -1698,12 +1731,51 @@ R.renderPrePaginatedItem = (Item) => {
     sML.style(Item, { width: '', height: '', transform: '' });
     let StageB = R.Stage[C.L_SIZE_B];
     let StageL = R.Stage[C.L_SIZE_L];
-    Item.Spreaded = (
+    
+    if(!Item.Viewport) Item.Viewport = R.getItemViewport(Item);
+    
+    // Check aspect ratio for single image items (IMG or SVG)
+    let forceNonSpread = false;
+    let isPortraitImage = false;
+    if((Item.OnlySingleIMG || Item.OnlySingleSVG) && Item.Viewport) {
+        const aspectRatio = Item.Viewport.Width / Item.Viewport.Height;
+        // Portrait: height > width (aspectRatio < 1)
+        // Landscape: width > height (aspectRatio > 1)
+        // Square: width == height (aspectRatio == 1)
+        
+        if(aspectRatio < 1) {
+            // Portrait image - should occupy single page in spread
+            isPortraitImage = true;
+            forceNonSpread = true;
+            delete Item['rendition:page-spread'];
+            if(Item.Spread && Item.Spread.Box) {
+                Item.Spread.Box.classList.remove('single-item-spread-center', 'single-item-spread-left', 'single-item-spread-right');
+            }
+            if(Item.SpreadPair) {
+                delete Item.SpreadPair.SpreadPair;
+                delete Item.SpreadPair;
+            }
+            if(Bibi.Dev) O.log(`Portrait image (${Item.Viewport.Width}x${Item.Viewport.Height}, ratio=${aspectRatio.toFixed(2)}): Item ${Item.Index}`);
+        } else if(aspectRatio >= 1.5) {
+            // Wide landscape image - can use full spread
+            if(Bibi.Dev) O.log(`Landscape image (${Item.Viewport.Width}x${Item.Viewport.Height}, ratio=${aspectRatio.toFixed(2)}): Item ${Item.Index}`);
+        } else {
+            // Near-square or slightly landscape - treat as portrait for better layout
+            isPortraitImage = true;
+            forceNonSpread = true;
+            delete Item['rendition:page-spread'];
+            if(Bibi.Dev) O.log(`Near-square image (${Item.Viewport.Width}x${Item.Viewport.Height}, ratio=${aspectRatio.toFixed(2)}): Item ${Item.Index}`);
+        }
+    }
+    
+    // Spread logic based on viewport orientation and image orientation
+    // Portrait viewport (1 page per spread): Never spread
+    // Landscape viewport (2 pages per spread): Spread only landscape images
+    Item.Spreaded = !forceNonSpread && R.PagesPerSpread == 2 && (
         (S.RVM == 'paged' || !S['full-breadth-layout-in-scroll'])
             &&
         (Item['rendition:spread'] == 'both' || R.Orientation == Item['rendition:spread'] || R.Orientation == 'landscape')
     );
-    if(!Item.Viewport) Item.Viewport = R.getItemViewport(Item);
   //if( Item.Viewport && !B.ICBViewport) B.ICBViewport = Item.Viewport;
     let ItemLoVp = null; // ItemLayoutViewport
     if(Item.Spreaded) {
@@ -1740,10 +1812,30 @@ R.renderPrePaginatedItem = (Item) => {
     } else {
         ItemLoVp = R.getItemLayoutViewport(Item);
         if(S.RVM == 'paged' || !S['full-breadth-layout-in-scroll']) {
+            // Calculate target dimensions based on viewport orientation and image orientation
+            let targetB = StageB;
+            let targetL = StageL;
+            
+            // In landscape mode (2 pages per spread), portrait images should fit in half width
+            // In portrait mode (1 page per spread), all images use full width
+            if(R.PagesPerSpread == 2 && isPortraitImage) {
+                // Landscape viewport + Portrait image = Half width
+                targetB = StageB / 2;
+                if(Bibi.Dev) O.log(`Landscape mode + Portrait image: scaling to half width ${targetB}px`);
+            } else if(R.PagesPerSpread == 1) {
+                // Portrait viewport = Full width for all images
+                if(Bibi.Dev) O.log(`Portrait mode: using full width ${targetB}px`);
+            } else {
+                // Landscape viewport + Landscape image = Full width
+                if(Bibi.Dev) O.log(`Landscape mode + Landscape image: using full width ${targetB}px`);
+            }
+            
             Item.Scale = Math.min(
-                StageB / ItemLoVp[C.L_SIZE_B],
-                StageL / ItemLoVp[C.L_SIZE_L]
+                targetB / ItemLoVp[C.L_SIZE_B],
+                targetL / ItemLoVp[C.L_SIZE_L]
             );
+            
+            if(Bibi.Dev) O.log(`Item ${Item.Index} scale: ${Item.Scale.toFixed(3)} (${ItemLoVp[C.L_SIZE_B]}x${ItemLoVp[C.L_SIZE_L]} -> ${Math.floor(ItemLoVp[C.L_SIZE_B]*Item.Scale)}x${Math.floor(ItemLoVp[C.L_SIZE_L]*Item.Scale)})`);
         } else {
             Item.Scale = StageB / ItemLoVp[C.L_SIZE_B];
         }
@@ -1853,6 +1945,8 @@ R.layOutBook = (Opt) => new Promise((resolve, reject) => {
 
 R.updateOrientation = () => {
     const PreviousOrientation = R.Orientation;
+    const PreviousPagesPerSpread = R.PagesPerSpread;
+    
     if(typeof window.orientation != 'undefined') {
         R.Orientation = (window.orientation == 0 || window.orientation == 180) ? 'portrait' : 'landscape';
     } else {
@@ -1860,10 +1954,17 @@ R.updateOrientation = () => {
         const H = window.innerHeight - (S.ARA == 'horizontal' ? O.Scrollbars.Height : 0);
         R.Orientation = (W / H) < S['orientation-border-ratio'] ? 'portrait' : 'landscape';
     }
+    
+    // Set pages per spread based on orientation
+    // Portrait (縦長): 1 page per spread (single page view)
+    // Landscape (横長): 2 pages per spread (spread view)
+    R.PagesPerSpread = (R.Orientation == 'portrait') ? 1 : 2;
+    
     if(R.Orientation != PreviousOrientation) {
         if(PreviousOrientation) E.dispatch('bibi:changes-orientation', R.Orientation);
         O.HTML.classList.remove('orientation-' + PreviousOrientation);
         O.HTML.classList.add('orientation-' + R.Orientation);
+        if(Bibi.Dev) O.log(`Orientation changed: ${PreviousOrientation} -> ${R.Orientation} (${R.PagesPerSpread} pages per spread)`);
         if(PreviousOrientation) E.dispatch('bibi:changed-orientation', R.Orientation);
     }
 };

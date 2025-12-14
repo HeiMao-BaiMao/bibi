@@ -125,7 +125,7 @@
 // [ja] Subpanel 内のアイコンすべてに適用される共通スタイル
 @mixin GENERALICON__CommonInSubpanels() {
 	&:before {
-		font-size: $Subpanel-Icon_Size * 3/4;
+		font-size: math.div($Subpanel-Icon_Size * 3, 4);
 	}
 }
 

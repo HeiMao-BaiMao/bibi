@@ -133,7 +133,7 @@ const Config = {
             sourceMap: IsDev,
             sassOptions: {
                 quietDeps: true,
-                silenceDeprecations: ['import']
+                silenceDeprecations: ['import', 'slash-div', 'color-functions', 'global-builtin', 'legacy-js-api']
             }
         }}
     ];
@@ -167,15 +167,12 @@ const Config = {
     Config.module.rules.push({
         test: /\.(eot|svg|ttf|otf|wof|woff|woff2)$/,
         include: [
-            resolvePath('node_modules/material-icons/iconfont/MaterialIcons-Regular')
+            resolvePath('node_modules/material-icons/iconfont')
         ],
-        use: [
-            { loader: 'file-loader', options: {
-                outputPath: 'bibi/resources/styles/fonts',
-                publicPath:                     './fonts',
-                name: '[name].[ext]'
-            }}
-        ]
+        type: 'asset/resource',
+        generator: {
+            filename: 'bibi/resources/styles/fonts/[name][ext]'
+        }
     });
     Config.module.rules.push({
         test: /\.(gif|png|jpg|svg)$/,
