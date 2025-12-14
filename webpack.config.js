@@ -14,7 +14,6 @@ const Bibi = require('./bibi.info.js');
 
 const FixStyleOnlyEntriesPlugin = require('webpack-fix-style-only-entries');
 const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
-const StringReplacePlugin = require('string-replace-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin')
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
@@ -77,8 +76,7 @@ const Config = {
     }).concat([
         new FixStyleOnlyEntriesPlugin({ extensions: ['scss', 'css'] }),
         new MiniCSSExtractPlugin({ filename: '[name]' }),
-        new BrowserSyncPlugin(require('./bs-config.js'), { reload: true, injectCss: true }),
-        new StringReplacePlugin()
+        new BrowserSyncPlugin(require('./bs-config.js'), { reload: true, injectCss: true })
     ]),
     module: { rules: [{
         test: /\.m?js$/,
@@ -99,10 +97,14 @@ const Config = {
             resolvePath(Bibi.SRC, 'bibi/resources/scripts/bibi.heart.js')
         ],
         use: [
-            StringReplacePlugin.replace({ replacements: [{
-                pattern: /____Bibi-Version____/ig,
-                replacement: () => Bibi.version
-            }]})
+            {
+                loader: 'string-replace-loader',
+                options: {
+                    search: '____Bibi-Version____',
+                    replace: Bibi.version,
+                    flags: 'ig'
+                }
+            }
         ]
     }]}
 };
@@ -143,10 +145,14 @@ const Config = {
         ],
         use: [
             MiniCSSExtractPlugin.loader,
-            StringReplacePlugin.replace({ replacements: [{
-                pattern: IsDev ? null : /@charset \\"UTF-8\\";\\n?/ig,
-                replacement: () => ''
-            }]})
+            ...(IsDev ? [] : [{
+                loader: 'string-replace-loader',
+                options: {
+                    search: '@charset "UTF-8";\\n?',
+                    replace: '',
+                    flags: 'ig'
+                }
+            }])
         ].concat(getCommonLoadersForCSS({ url: true, import: true }))
     });
     Config.module.rules.push({
@@ -185,10 +191,14 @@ if(IsDev) {
             resolvePath(Bibi.SRC, 'bibi/resources/scripts/bibi.heart.js')
         ],
         use: [
-            StringReplacePlugin.replace({ replacements: [{
-                pattern: /$/,
-                replacement: () => '\n' + `Bibi.Dev = true;`
-            }]})
+            {
+                loader: 'string-replace-loader',
+                options: {
+                    search: '$',
+                    replace: '\n' + `Bibi.Dev = true;`,
+                    flags: ''
+                }
+            }
         ]
     });
 } else {
