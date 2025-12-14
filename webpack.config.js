@@ -12,7 +12,6 @@ const Path = require('path'), resolvePath = (..._) => Path.resolve(__dirname, _.
 const Package = require('./package.json');
 const Bibi = require('./bibi.info.js');
 
-const HardSourcePlugin = require('hard-source-webpack-plugin');
 const FixStyleOnlyEntriesPlugin = require('webpack-fix-style-only-entries');
 const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
 const StringReplacePlugin = require('string-replace-webpack-plugin');
