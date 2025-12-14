@@ -12,7 +12,7 @@ const Bibi = {
         'name': 'Satoru Matsushima'
     },
     'description': 'Bibi | EPUB Reader on your website.',
-    'homepage': 'https://bibi.epub.link or https://github.com/satorumurmur/bibi'
+    'homepage': 'https://bibi.epub.link or https://github.com/HeiMao-BaiMao/bibi'
 };
 
 Bibi.Arguments = (() => {
@@ -42,7 +42,7 @@ const _banner = (Opt) => '/*!' + `
  *  # ${ Opt.Name }` + (!Opt.Mark ? '' : (s => { for(let l = Math.max(69 - (6 + Opt.Name.length) - 4, 1), i = 0; i < l; i++) s = ' ' + s; return s; })(`(℠)`)) + `
  *` + (!Opt.Credit ? '' : (Opt.Credit == Bibi ? `
  *  * © ${ Bibi.author.name } - ${ Bibi.homepage }
- *  * Open source under the MIT License - https://github.com/satorumurmur/bibi/blob/master/LICENSE` : '\n' + Opt.Credit.replace(/^\n|\n$/g, '')) + `
+ *  * Open source under the MIT License - https://github.com/HeiMao-BaiMao/bibi/blob/master/LICENSE` : '\n' + Opt.Credit.replace(/^\n|\n$/g, '')) + `
  *`) + (!Opt.Extra ? '' : '\n' + Opt.Extra.replace(/^\n|\n$/g, '') + `
  *`) + '\n */';
 
@@ -141,7 +141,7 @@ Bibi.Banners = Object.assign({
  *  * © The Creator(s) of This Dress
 `, Extra: `
  *  * Based on:
- *      - The Bibi Dress Design System : © ${ Bibi.author.name } - ${ Bibi.homepage } / Licensed under the MIT License - https://github.com/satorumurmur/bibi/blob/master/LICENSE
+ *      - The Bibi Dress Design System : © ${ Bibi.author.name } - ${ Bibi.homepage } / Licensed under the MIT License - https://github.com/HeiMao-BaiMao/bibi/blob/master/LICENSE
 `, Mark: true })
 
 // =============================================================================================================================

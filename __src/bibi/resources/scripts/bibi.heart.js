@@ -230,7 +230,7 @@ Bibi.hello = () => new Promise(resolve => {
     O.log.initialize();
     O.log(`Hello!`, '<b:>');
     O.log(`[ja] ${ Bibi['href'] }`);
-    O.log(`[en] https://github.com/satorumurmur/bibi`);
+    O.log(`[en] https://github.com/HeiMao-BaiMao/bibi`);
     resolve();
 })
 .then(Bibi.initialize)

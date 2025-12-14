@@ -119,7 +119,7 @@ const Config = {
             importLoaders: 2
         }},
         { loader: 'postcss-loader', options: {
-            config: {
+            postcssOptions: {
                 ctx: {
                     'postcss-cssnext': BrowsersList,//'autoprefixer': { grid: true },
                     'cssnano': { zindex: false }
@@ -128,7 +128,10 @@ const Config = {
             sourceMap: IsDev
         }},
         { loader: 'sass-loader', options: {
-            sourceMap: IsDev
+            sourceMap: IsDev,
+            sassOptions: {
+                quietDeps: true
+            }
         }}
     ];
     Config.module.rules.push({
@@ -190,7 +193,6 @@ if(IsDev) {
 } else {
     for(const B in Bibi.Banners) if(B && Bibi.Banners[B]) Config.plugins.push(new Webpack.BannerPlugin({ test: B, banner: Bibi.Banners[B], raw: true }));
     Config.optimization.minimizer.push(new TerserPlugin({
-        cache: true,
         parallel: true,
         extractComments: false,
         terserOptions: {
