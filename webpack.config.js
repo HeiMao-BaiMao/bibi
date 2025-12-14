@@ -132,7 +132,7 @@ const Config = {
             sourceMap: IsDev,
             sassOptions: {
                 quietDeps: true,
-                silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'slash-div']
+                silenceDeprecations: ['import']
             }
         }}
     ];
