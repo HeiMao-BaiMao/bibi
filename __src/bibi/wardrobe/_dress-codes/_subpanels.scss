@@ -2,7 +2,9 @@
 // + Subpanel
 // --------------------------------------------------------------------------------
 
-$Subpanel_KeyColor: saturate(steelblue, 20%);
+@use "sass:color";
+
+$Subpanel_KeyColor: color.adjust(steelblue, $saturation: 20%);
 // [ja] └ Subpanel 内のキーカラー（アイコンや文字色の一貫性を保つための共通／事前定義）
 
 $Subpanel-Icon_Size: 21px;
@@ -181,7 +183,7 @@ $Subpanel-Icon-Font_PaintColor__Hover:    $Subpanel_KeyColor;
 $Subpanel-Icon-Font_OutlineColor__Hover:  transparent;
 $Subpanel-Icon-Shape_PaintColor__Hover:   white;
 $Subpanel-Icon-Shape_OutlineColor__Hover: $Subpanel_KeyColor;
-$Subpanel-Icon_BackgroundColor__Hover:    lighten($Subpanel_KeyColor, 45%);
+$Subpanel-Icon_BackgroundColor__Hover:    color.adjust($Subpanel_KeyColor, $lightness: 45%);
 $Subpanel-Icon_BorderColor__Hover:        $Subpanel_KeyColor;
 $Subpanel-Icon_Transform__Hover:          $Subpanel-Icon_Transform;
 
@@ -199,7 +201,7 @@ $Subpanel-Icon-Font_PaintColor__Active-Hover:    white;
 $Subpanel-Icon-Font_OutlineColor__Active-Hover:  transparent;
 $Subpanel-Icon-Shape_PaintColor__Active-Hover:   white;
 $Subpanel-Icon-Shape_OutlineColor__Active-Hover: $Subpanel_KeyColor;
-$Subpanel-Icon_BackgroundColor__Active-Hover:    lighten($Subpanel_KeyColor, 20%);
+$Subpanel-Icon_BackgroundColor__Active-Hover:    color.adjust($Subpanel_KeyColor, $lightness: 20%);
 $Subpanel-Icon_BorderColor__Active-Hover:        $Subpanel_KeyColor;
 $Subpanel-Icon_Transform__Active-Hover:          $Subpanel-Icon_Transform__Active;
 

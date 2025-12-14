@@ -2,6 +2,8 @@
 // + Subpanel
 // --------------------------------------------------------------------------------
 
+@use "sass:math";
+
 div.bibi-subpanel {
 	&.bibi-subpanel-right, &:not(.bibi-subpanel-left) { right: $Subpanel_Margin; }
 	&.bibi-subpanel-left { left: $Subpanel_Margin; }
@@ -111,9 +113,9 @@ div.bibi-subpanel {
 	.bibi-buttongroup-tiled {
 		.bibi-buttonbox {
 			.bibi-button {
-				padding-right: $Subpanel-Button_HorizontalPadding / 2;
+				padding-right: math.div($Subpanel-Button_HorizontalPadding, 2);
 				.bibi-button-label {
-					margin-top: ($Subpanel-Button_Height - 12px) / 2 - 0.5px;
+					margin-top: math.div($Subpanel-Button_Height - 12px, 2) - 0.5px;
 				}
 			}
 		}

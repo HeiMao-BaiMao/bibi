@@ -128,9 +128,11 @@ const Config = {
             sourceMap: IsDev
         }},
         { loader: 'sass-loader', options: {
+            api: 'modern-compiler',
             sourceMap: IsDev,
             sassOptions: {
-                quietDeps: true
+                quietDeps: true,
+                silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'slash-div']
             }
         }}
     ];

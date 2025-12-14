@@ -2,6 +2,9 @@
 // + Menu
 // --------------------------------------------------------------------------------
 
+@use "sass:math";
+@use "sass:color";
+
 $Menu_Height:    39px;
 $Menu-Icon_Size: 31px;
 
@@ -23,8 +26,8 @@ $Menu_BorderBottomColor__NotBFH__Hover:  $Menu_BorderBottomColor__NotBFH;
 $Menu_BorderBottomColor__NotBFH__Active: $Menu_BorderBottomColor__NotBFH__Hover;
 $Menu_BoxShadow__NotBFH__Active: $Menu_BoxShadow__Active;
 
-$Menu-ButtonGroup_Padding: ($Menu_Height - $Menu-Icon_Size) / 2;
-$Menu-ButtonGroup-Button_Margin: ($Menu_Height - $Menu-Icon_Size) / 4;
+$Menu-ButtonGroup_Padding: math.div($Menu_Height - $Menu-Icon_Size, 2);
+$Menu-ButtonGroup-Button_Margin: math.div($Menu_Height - $Menu-Icon_Size, 4);
 $Menu-ButtonGroup-Separator_Width: 1px;
 $Menu-ButtonGroup-Separator_Color: rgba(216,216,216, 0.5);
 
@@ -63,16 +66,16 @@ $Menu-Icon-Font_OutlineColor__Active:  transparent;
 $Menu-Icon-Shape_PaintColor__Active:   $Menu-Icon-Shape_PaintColor;
 $Menu-Icon-Shape_OutlineColor__Active: $Menu-Icon-Font_PaintColor;
 $Menu-Icon_BackgroundColor__Active:    $Menu-Icon-Font_PaintColor;
-$Menu-Icon_BorderColor__Active:        darken($Menu-Icon_BorderColor, 30%);
+$Menu-Icon_BorderColor__Active:        color.adjust($Menu-Icon_BorderColor, $lightness: -30%);
 $Menu-Icon_Transform__Active:          rotate(360deg);
 
 // Active:Hover
 $Menu-Icon-Font_PaintColor__Active-Hover:    $Menu-Icon-Font_PaintColor__Active;
 $Menu-Icon-Font_OutlineColor__Active-Hover:  transparent;
 $Menu-Icon-Shape_PaintColor__Active-Hover:   $Menu-Icon-Shape_PaintColor__Active;
-$Menu-Icon-Shape_OutlineColor__Active-Hover: lighten($Menu-Icon-Shape_OutlineColor__Active, 10%);
+$Menu-Icon-Shape_OutlineColor__Active-Hover: color.adjust($Menu-Icon-Shape_OutlineColor__Active, $lightness: 10%);
 $Menu-Icon_BackgroundColor__Active-Hover:    rgb(96,96,96);
-$Menu-Icon_BorderColor__Active-Hover:        lighten($Menu-Icon_BorderColor__Active, 10%);
+$Menu-Icon_BorderColor__Active-Hover:        color.adjust($Menu-Icon_BorderColor__Active, $lightness: 10%);
 $Menu-Icon_Transform__Active-Hover:          $Menu-Icon_Transform__Active;
 
 // Transition

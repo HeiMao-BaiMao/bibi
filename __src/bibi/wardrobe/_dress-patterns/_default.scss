@@ -2,6 +2,8 @@
 // + Special Icons
 // --------------------------------------------------------------------------------
 
+@use "sass:math";
+
 
 // - Panel Toggler (.bibi-icon-toggle-panel) in Menu
 // --------------------------------------------------------------------------------
@@ -90,7 +92,7 @@ $DEFAULT__SPECIALICON__TogglePanel-Bar_BorderRadius: 1px;
 // --------------------------------------------------------------------------------
 
 @mixin DEFAULT__SPECIALICON__Book($SCOPED__Size, $SCOPED__OuterColor, $SCOPED__InnerColor, $SCOPED__Position: relative) {
-	$SCOPED__Line_Width: $SCOPED__Size * 8/128;
+	$SCOPED__Line_Width: math.div($SCOPED__Size * 8, 128);
 	$SCOPED__Book_Width: $SCOPED__Size - $SCOPED__Line_Width * 2.5;
 	$SCOPED__Book_Height: $SCOPED__Size;
 	$SCOPED__Cover_Width: $SCOPED__Book_Width - $SCOPED__Line_Width * 2;
