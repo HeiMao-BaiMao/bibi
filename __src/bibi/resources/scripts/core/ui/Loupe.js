@@ -3,7 +3,7 @@ import sML from 'sml.js';
 export default class Loupe {
     constructor(I) {
         this.I = I;
-        const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
+        const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L; const C = I.C;
         this.I.Loupe = { create: () => {
         if(S['loupe-max-scale']      <= 1) S['loupe-max-scale']      = 4.0;
         if(S['loupe-scale-per-step'] <= 1) S['loupe-scale-per-step'] = 1.6;

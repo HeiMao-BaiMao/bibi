@@ -19,7 +19,8 @@ export const UIHelpers = {
         delete Par.Button;
         const ButtonGroup = sML.create('ul', Par);
         ButtonGroup.Buttons = [];
-        const UI = this; 
+        const UI = this;
+        ButtonGroup.I = UI; 
         ButtonGroup.addButton = function(Par) {
             const Button = UI.createButton(Par);
             if(!Button) return null;
@@ -56,6 +57,7 @@ export const UIHelpers = {
             }
         }
         const Button = sML.create((typeof Par.href == 'string' ? 'a' : 'span'), Par);
+        Button.I = this;
         if(Button.Icon) {
             Button.IconBox = Button.appendChild(sML.create('span', { className: 'bibi-button-iconbox' }));
             Button.IconBox.appendChild(Button.Icon);
@@ -89,6 +91,7 @@ export const UIHelpers = {
         delete Par.Sections;
         delete Par.Section;
         const Subpanel = this.O.Body.appendChild(sML.create('div', Par));
+        Subpanel.I = UI;
         Subpanel.Sections = [];
         Subpanel.addEventListener(this.E['pointerdown'], Eve => Eve.stopPropagation());
         Subpanel.addEventListener(this.E['pointerup'],   Eve => Eve.stopPropagation());
@@ -149,6 +152,7 @@ export const UIHelpers = {
         delete Par.ButtonGroups;
         delete Par.ButtonGroup;
         const SubpanelSection = sML.create('div', Par);
+        SubpanelSection.I = UI;
         if(SubpanelSection.Labels) { // HGroup
             SubpanelSection.Labels = this.distillLabels(SubpanelSection.Labels);
             SubpanelSection

@@ -4,9 +4,9 @@ export default class Menu {
     constructor(I) {
         this.I = I;
         const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
-        this.Menu = { create: () => {
+        this.I.Menu = { create: () => {
         if(!S['use-menubar']) O.HTML.classList.add('without-menubar');
-        const Menu = this.Menu = O.Body.appendChild(sML.create('div', { id: 'bibi-menu' }, this.Menu)); delete Menu.create;
+        const Menu = this.I.Menu = O.Body.appendChild(sML.create('div', { id: 'bibi-menu' }, this.I.Menu)); delete Menu.create;
         //Menu.addEventListener('click', Eve => Eve.stopPropagation());
         this.I.TouchObserver.setElementHoverActions(Menu);
         this.I.setToggleAction(Menu, {
@@ -49,7 +49,7 @@ export default class Menu {
         [Menu.L, Menu.R].forEach(MenuSide => {
         MenuSide.ButtonGroups = [];
         MenuSide.addButtonGroup = function(Par) {
-        const ButtonGroup = this.I.createButtonGroup(Par);
+        const ButtonGroup = I.createButtonGroup(Par);
         if(!ButtonGroup) return null;
         this.ButtonGroups.push(ButtonGroup);
         return this.appendChild(ButtonGroup);
@@ -66,8 +66,8 @@ export default class Menu {
         E.dispatch('bibi:created-menu');
         }};
         
-        this.Menu.Config = { create: () => {
-        const Menu = this.Menu;
+        this.I.Menu.Config = { create: () => {
+        const Menu = this.I.Menu;
         const Components = [];
         if(!S['fix-reader-view-mode'])                                                                     Components.push('ViewModeSection');
         if(O.Embedded)                                                                                     Components.push('NewWindowButton');
@@ -75,7 +75,7 @@ export default class Menu {
         if(S['website-href'] && /^https?:\/\/[^\/]+/.test(S['website-href']) && S['website-name-in-menu']) Components.push('WebsiteLink');
         if(!S['remove-bibi-website-link'])                                                                 Components.push('BibiWebsiteLink');
         if(!Components.length) {
-        delete this.Menu.Config;
+        delete this.I.Menu.Config;
         return;
         }
         const Config = Menu.Config = sML.applyRtL(this.I.createSubpanel({ id: 'bibi-subpanel_config' }), Menu.Config); delete Config.create;
@@ -94,8 +94,8 @@ export default class Menu {
         E.dispatch('bibi:created-config');
         }};
         
-        this.Menu.Config.ViewModeSection = { create: () => {
-        const Config = this.Menu.Config;
+        this.I.Menu.Config.ViewModeSection = { create: () => {
+        const Config = this.I.Menu.Config;
         const /* SpreadShapes */ SSs = (/* SpreadShape */ SS => SS + SS + SS)((/* ItemShape */ IS => `<span class="bibi-shape bibi-shape-spread">${ IS + IS }</span>`)(`<span class="bibi-shape bibi-shape-item"></span>`));
         const Section = Config.ViewModeSection = Config.addSection({
         Labels: { default: { default: `View Mode`, ja: `閲覧モード` } },
@@ -152,8 +152,8 @@ export default class Menu {
         });
         }};
         
-        this.Menu.Config.WindowSection = { create: (Components) => {
-        const Config = this.Menu.Config;
+        this.I.Menu.Config.WindowSection = { create: (Components) => {
+        const Config = this.I.Menu.Config;
         const Buttons = [];
         if(Components.includes('NewWindowButton')) {
         Buttons.push({
@@ -200,8 +200,8 @@ export default class Menu {
         }
         }};
         
-        this.Menu.Config.LinkageSection = { create: (Components) => {
-        const Config = this.Menu.Config;
+        this.I.Menu.Config.LinkageSection = { create: (Components) => {
+        const Config = this.I.Menu.Config;
         const Buttons = [];
         if(Components.includes('WebsiteLink')) Buttons.push({
         Type: 'link',

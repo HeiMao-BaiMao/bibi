@@ -7,6 +7,8 @@
 
 
 
+import sML from 'sml.js';
+
 import EventManager from './core/EventManager.js';
 import SettingsManager from './core/SettingsManager.js';
 import SessionManager from './core/SessionManager.js';
@@ -22,6 +24,8 @@ import Messages from './core/Messages.js';
 import Extensions from './core/Extensions.js';
 import Book from './core/Book.js';
 
+self.sML = sML;
+
 export const Bibi = { 'version': '____Bibi-Version____', 'href': 'https://bibi.epub.link', Status: '', TimeOrigin: Date.now() };
 
 export const E = new EventManager();
@@ -36,6 +40,8 @@ export const D = new DocSettings();
 export const O = new Operator();
 export const M = new Messages();
 export const X = new Extensions();
+
+Bibi.preset = (Settings) => { for(const Pro in Settings) P[Pro] = Settings[Pro]; };
 
 Bibi.SettingTypes = S.Types;
 Bibi.SettingTypes_PresetOnly = S.Types_PresetOnly;
@@ -72,7 +78,7 @@ Bibi.at1st = () => Bibi.at1st.List.forEach(fn => typeof fn == 'function' ? fn() 
 
 Bibi.hello = () => new Promise(resolve => {
     Bibi.at1st();
-    O.log.initialize();
+    O.log.initialize(Bibi, U);
     O.log(`Hello!`, '<b:>');
     O.log(`[ja] ${ Bibi['href'] }`);
     O.log(`[en] https://github.com/HeiMao-BaiMao/bibi`);
@@ -128,6 +134,7 @@ Bibi.initialize = () => {
     { // Modules
         X.initialize(S, E);
         O.initialize(Bibi, I, S, R, U, B, L, E, X);
+        P.Script = Bibi.Script;
         P.initialize(U);
         U.initialize(S, R, X, E);
         D.initialize(Bibi);
@@ -306,6 +313,7 @@ Bibi.loadBook = (BookInfo) => Promise.resolve().then(() => {
     return L.preprocessResources();
 }).then(() => {
     // Load & Layout Items in Spreads and Pages
+    O.log(`Spreads: ${R.Spreads.length}, Items: ${R.Items.length}`);
     O.log(`Loading Items in Spreads...`, '<g:>');
     const Promises = [];
     const LayoutOption = {
@@ -315,7 +323,7 @@ Bibi.loadBook = (BookInfo) => Promise.resolve().then(() => {
         addResetter:    () => { window   .addEventListener('resize', LayoutOption.resetter); },
         removeResetter: () => { window.removeEventListener('resize', LayoutOption.resetter); }
     };
-    if(typeof R.StartOn == 'object') {
+    if(R.StartOn && typeof R.StartOn == 'object') {
         const Item = typeof R.StartOn.Item == 'object' ? R.StartOn.Item : (() => {
             if(typeof R.StartOn.ItemIndex == 'number') {
                 let II = R.StartOn.ItemIndex;
@@ -358,7 +366,7 @@ Bibi.loadBook = (BookInfo) => Promise.resolve().then(() => {
         LayoutOption.TargetSpreadIndex = Item && Item.Spread ? Item.Spread.Index : 0;
         LayoutOption.Destination = R.StartOn;
     }
-    LayoutOption.addResetter();
+    // LayoutOption.addResetter();
     let LoadedItems = 0;
     R.Spreads.forEach(Spread => Promises.push(new Promise(resolve => L.loadSpread(Spread, { AllowPlaceholderItems: S['allow-placeholders'] && Spread.Index != LayoutOption.TargetSpreadIndex }).then(() => {
         LoadedItems += Spread.Items.length;
@@ -373,6 +381,7 @@ Bibi.loadBook = (BookInfo) => Promise.resolve().then(() => {
 
 
 Bibi.bindBook = (LayoutOption) => {
+    O.log(`Bibi.bindBook: Reset=${LayoutOption.Reset}`); // Debug log
     if(!LayoutOption.Reset) {
         R.organizePages();
         R.layOutStage();
@@ -398,6 +407,7 @@ Bibi.openBook = (LayoutOption) => new Promise(resolve => {
     resolve();
 }).then(() => {
     const LandingPage = R.hatchPage(LayoutOption.Destination) || R.Pages[0];
+    O.log(`LandingPage: ${LandingPage}, Pages: ${R.Pages.length}`); // Debug
     if(!I.History.List.length) {
         I.History.List = [{ UI: Bibi, Item: LandingPage.Item, PageProgressInItem: LandingPage.IndexInItem / LandingPage.Item.Pages.length }];
         I.History.update();

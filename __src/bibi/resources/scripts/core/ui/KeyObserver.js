@@ -3,7 +3,7 @@ import sML from 'sml.js';
 export default class KeyObserver {
     constructor(I) {
         this.I = I;
-        const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
+        const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L; const C = I.C;
         this.I.KeyObserver = { create: () => { if(!S['use-keys']) return;
         const KeyObserver = this.I.KeyObserver = {
         ActiveKeys: {},

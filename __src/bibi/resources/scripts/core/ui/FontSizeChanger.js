@@ -11,29 +11,26 @@ export default class FontSizeChanger {
         const BibiBiscuits = O.Biscuits.remember('Bibi');
         if(BibiBiscuits && BibiBiscuits.FontSize && BibiBiscuits.FontSize.Step != undefined) FontSizeChanger.Step = BibiBiscuits.FontSize.Step * 1;
         }
-        if(typeof FontSizeChanger.Step != 'number' || FontSizeChanger.Step < -2 || 2 < FontSizeChanger.Step) FontSizeChanger.Step = 0;
+        if(typeof FontSizeChanger.Step != 'number' || FontSizeChanger.Step < -4 || 4 < FontSizeChanger.Step) FontSizeChanger.Step = 0;
         E.bind('bibi:postprocessed-item', Item => { if(Item['rendition:layout'] == 'pre-paginated') return false;
         Item.changeFontSize = (FontSize) => {
-        if(Item.FontSizeStyleRule) sML.deleteCSSRule(Item.contentDocument, Item.FontSizeStyleRule);
+        if(typeof Item.FontSizeStyleRule == 'number') sML.deleteCSSRule(Item.contentDocument, Item.FontSizeStyleRule);
         Item.FontSizeStyleRule = sML.appendCSSRule(Item.contentDocument, 'html', 'font-size: ' + FontSize + 'px !important;');
         };
         Item.changeFontSizeStep = (Step) => Item.changeFontSize(Item.FontSize.Base * Math.pow(S['font-size-scale-per-step'], Step));
         Item.FontSize = {
-        Default: getComputedStyle(Item.HTML).fontSize.replace(/[^\d]*$/, '') * 1
+        Default: parseFloat(getComputedStyle(Item.HTML).fontSize)
         };
         Item.FontSize.Base = Item.FontSize.Default;
         if(Item.Source.Preprocessed && (sML.UA.Chrome || sML.UA.Trident)) {
-        sML.forEach(Item.HTML.querySelectorAll('body, body *'))(Ele => Ele.style.fontSize = parseInt(getComputedStyle(Ele).fontSize) / Item.FontSize.Base + 'rem');
+        sML.forEach(Item.HTML.querySelectorAll('body, body *'))(Ele => { const ComputedFS = parseFloat(getComputedStyle(Ele).fontSize); if(ComputedFS) Ele.style.fontSize = ComputedFS / Item.FontSize.Base + 'rem'; });
         } else {
         O.editCSSRules(Item.contentDocument, CSSRule => {
-        if(!CSSRule || !CSSRule.selectorText || /^@/.test(CSSRule.selectorText)) return;
+        if(!CSSRule || !CSSRule.style || !CSSRule.style.fontSize || /^@/.test(CSSRule.selectorText)) return;
         try { if(Item.contentDocument.querySelector(CSSRule.selectorText) == Item.HTML) return; } catch(_) {}
-        const REs = {
-        'pt': / font-size: (\d[\d\.]*)pt; /,
-        'px': / font-size: (\d[\d\.]*)px; /
-        };
-        if(REs['pt'].test(CSSRule.cssText)) CSSRule.style.fontSize = CSSRule.cssText.match(REs['pt'])[1] * (96/72) / Item.FontSize.Base + 'rem';
-        if(REs['px'].test(CSSRule.cssText)) CSSRule.style.fontSize = CSSRule.cssText.match(REs['px'])[1]           / Item.FontSize.Base + 'rem';
+        const FS = CSSRule.style.fontSize;
+        if(FS.endsWith('pt')) CSSRule.style.fontSize = parseFloat(FS) * (96/72) / Item.FontSize.Base + 'rem';
+        else if(FS.endsWith('px')) CSSRule.style.fontSize = parseFloat(FS) / Item.FontSize.Base + 'rem';
         });
         }
         if(typeof S['base-font-size'] == 'number' && S['base-font-size'] > 0) {
@@ -111,11 +108,11 @@ export default class FontSizeChanger {
         Buttons: [{
         Labels: { default: { default: `<span class="non-visual-in-label">Font Size:</span> Ex-Large`,                        ja: `<span class="non-visual-in-label">文字サイズ：</span>最大` } },
         Icon: `<span class="bibi-icon bibi-icon-fontsize bibi-icon-fontsize-exlarge"></span>`,
-        action: changeFontSizeStep, Step:  2
+        action: changeFontSizeStep, Step:  4
         }, {
         Labels: { default: { default: `<span class="non-visual-in-label">Font Size:</span> Large`,                           ja: `<span class="non-visual-in-label">文字サイズ：</span>大` } },
         Icon: `<span class="bibi-icon bibi-icon-fontsize bibi-icon-fontsize-large"></span>`,
-        action: changeFontSizeStep, Step:  1
+        action: changeFontSizeStep, Step:  2
         }, {
         Labels: { default: { default: `<span class="non-visual-in-label">Font Size:</span> Medium <small>(default)</small>`, ja: `<span class="non-visual-in-label">文字サイズ：</span>中<small>（初期値）</small>` } },
         Icon: `<span class="bibi-icon bibi-icon-fontsize bibi-icon-fontsize-medium"></span>`,
@@ -123,11 +120,11 @@ export default class FontSizeChanger {
         }, {
         Labels: { default: { default: `<span class="non-visual-in-label">Font Size:</span> Small`,                           ja: `<span class="non-visual-in-label">文字サイズ：</span>小` } },
         Icon: `<span class="bibi-icon bibi-icon-fontsize bibi-icon-fontsize-small"></span>`,
-        action: changeFontSizeStep, Step: -1
+        action: changeFontSizeStep, Step: -2
         }, {
         Labels: { default: { default: `<span class="non-visual-in-label">Font Size:</span> Ex-Small`,                        ja: `<span class="non-visual-in-label">文字サイズ：</span>最小` } },
         Icon: `<span class="bibi-icon bibi-icon-fontsize bibi-icon-fontsize-exsmall"></span>`,
-        action: changeFontSizeStep, Step: -2
+        action: changeFontSizeStep, Step: -4
         }]
         }).Buttons.forEach(Button => { if(Button.Step == FontSizeChanger.Step) this.I.setUIState(Button, 'active'); });
         }

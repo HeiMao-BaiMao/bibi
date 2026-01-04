@@ -6,7 +6,7 @@ export default class Catcher {
         const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
         this.I.Catcher = { create: () => { if(S['book-data'] || S['book'] || !S['accept-local-file']) return;
         const Catcher = this.I.Catcher = O.Body.appendChild(sML.create('div', { id: 'bibi-catcher' }));
-        Catcher.insertAdjacentHTML('afterbegin', this.I.distillLabels.distillLanguage({
+        Catcher.insertAdjacentHTML('afterbegin', this.I.distillLabels.distillLanguage.call(this.I, {
         default: [
         `<div class="pgroup" lang="en">`,
         `<p><strong>Pass Me Your EPUB File!</strong></p>`,

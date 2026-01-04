@@ -200,6 +200,12 @@ export default class SettingsManager {
     }
 
     initialize(Bibi, O, E, U, D, P, B, C) {
+        // Clean up self
+        for(const Pro in this) {
+            if (Pro === 'Types' || Pro === 'Types_PresetOnly' || Pro === 'Types_UserOnly' || Pro === 'Verifiers') continue;
+            if(typeof this[Pro] != 'function') delete this[Pro];
+        }
+
         this.Bibi = Bibi;
         this.O = O;
         this.E = E;
@@ -208,11 +214,6 @@ export default class SettingsManager {
         this.P = P;
         this.B = B;
         this.C = C;
-        // Clean up self
-        for(const Pro in this) {
-            if (Pro === 'Types' || Pro === 'Types_PresetOnly' || Pro === 'Types_UserOnly' || Pro === 'Verifiers') continue;
-            if(typeof this[Pro] != 'function') delete this[Pro];
-        }
 
         sML.applyRtL(this, P, 'ExceptFunctions');
         sML.applyRtL(this, U, 'ExceptFunctions');

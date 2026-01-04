@@ -31,6 +31,7 @@ export default class Reader {
     }
 
     initialize(Bibi, O, S, E, I, B, C, L, X) {
+        console.log("Reader initialized. O:", O, "S:", S); // Debug dependency injection
         this.Bibi = Bibi;
         this.O = O;
         this.S = S;
@@ -95,6 +96,7 @@ export default class Reader {
         }
         Spread.Pages = [];
         Spread.Items.forEach(Item => Item.Pages.forEach(Page => Page.IndexInSpread = Spread.Pages.push(Page) - 1));
+        console.log(`layOutSpread called for spread: ${Spread.Index}, Pages created: ${Spread.Pages.length}`); // Debug log
         const SpreadSize = { Width: 0, Height: 0 }, SpreadBox = Spread.Box;
         if(Spread.Items.length == 1) {
             const Item = Spread.Items[0];
@@ -694,6 +696,7 @@ export default class Reader {
     };
 
     hatchPage = (_) => {
+        if(!_) return null;
         if(typeof _.P == 'string' && _.P) Object.assign(_, this.getPDestination(_.P));
         if(_.Page) return _.Page;
         if(typeof _.PageIndex == 'number') return this.Pages[_.PageIndex];

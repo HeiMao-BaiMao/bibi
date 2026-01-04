@@ -3,7 +3,7 @@ import sML from 'sml.js';
 export default class WheelObserver {
     constructor(I) {
         this.I = I;
-        const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
+        const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L; const C = I.C;
         this.I.WheelObserver = { create: () => {
         const WheelObserver = this.I.WheelObserver = {
         TotalDelta: 0,

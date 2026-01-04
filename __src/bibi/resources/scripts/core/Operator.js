@@ -4,6 +4,114 @@ import SessionManager from './SessionManager.js';
 export default class Operator {
     constructor() {
         this.TimeCard = {};
+        
+        this.isBin = (Source) => /\.(aac|gif|jpe?g|m4[av]|mp[g34]|ogg|[ot]tf|pdf|png|web[mp]|woff2?)$/i.test(Source.Path);
+        
+        this.createBlobURL = (DT, CB, MT) => URL.createObjectURL(DT == 'Text' ? new Blob([CB], { type: MT }) : CB);
+        
+        this.ContentTypes = {
+            'pdf'     : 'application/pdf',
+            'xht(ml)?': 'application/xhtml+xml',
+            'xml'     : 'application/xml',
+            'aac'     :       'audio/aac',
+            'mp3'     :       'audio/mpeg',
+            'otf'     :        'font/opentype',
+            'ttf'     :        'font/truetype',
+            'woff'    :        'font/woff',
+            'woff2'   :        'font/woff2',
+            'gif'     :       'image/gif',
+            'jpe?g'   :       'image/jpeg',
+            'png'     :       'image/png',
+            'svg'     :       'image/svg+xml',
+            'webp'    :       'image/webp',
+            'css'     :        'text/css',
+            'js'      :        'text/javascript',
+            'html?'   :        'text/html',
+            'mp4'     :       'video/mp4',
+            'webm'    :       'video/webm',
+            'ya?ml'   : 'application/x-yaml'
+        };
+        
+        this.getContentType = (FileName) => {
+            for(const Ext in this.ContentTypes) if(new RegExp('\\.' + Ext + '$').test(FileName)) return this.ContentTypes[Ext];
+            return null;
+        };
+
+        this.log = (Log, A2, A3) => { let Obj = '', Tag = '';
+                 if(A3)      Obj = A2, Tag = A3;
+            else if(/^<..>$/.test(A2)) Tag = A2;
+            else if(A2)      Obj = A2;
+            switch(Tag) {
+                case '<e/>': return console.error(Log);
+                case '</g>': this.log.Depth--;
+            }
+            if(
+                (Log || Obj)
+                    &&
+                (this.log.Depth <= this.log.Limit || Tag == '<b:>' || Tag == '</b>' || Tag == '<*/>')
+            ) {
+                const Time = (this.log.Depth <= 1) ? this.stamp(Log) : 0;
+                let Ls = [], Ss = [];
+                if(Log) switch(Tag) {
+                    case '<b:>': Ls.unshift(`📕`); Ls.push('%c' + Log), Ss.push(this.log.BStyle);                 Ls.push(`%c(v${ this.Bibi['version'] })` + (this.Bibi.Dev ? ':%cDEV' : '')), Ss.push(this.log.NStyle); if(this.Bibi.Dev) Ss.push(this.log.BStyle); break;
+                    case '</b>': Ls.unshift(`📖`); Ls.push('%c' + Log), Ss.push(this.log.BStyle); if(this.log.Limit) Ls.push(`%c(${ Math.floor(Time / 1000) + '.' + String(Time % 1000).padStart(3, 0) }sec)`), Ss.push(this.log.NStyle); break;
+                    case '<g:>': Ls.unshift(`┌`); Ls.push(Log); break;
+                    case '</g>': Ls.unshift(`└`); Ls.push(Log); break;
+                  //case '<o/>': Ls.unshift( `>`); Ls.push(Log); break;
+                    default    : Ls.unshift( `-`); Ls.push(Log);
+                }
+                for(let i = this.log.Depth; i > 1; i--) Ls.unshift('│');
+                Ls.unshift('%cBibi:'); Ss.unshift(this.log.NStyle);
+                switch(Tag) {
+                  //case '<o/>': this.log.log('groupCollapsed', Ls, Ss); console.log(Obj); console.groupEnd(); break;
+                    default    : this.log.log('log',            Ls, Ss,              Obj                    );
+                }
+            }
+            switch(Tag) {
+                case '<g:>': this.log.Depth++;
+            }
+        };
+        
+            this.log.initialize = (Bibi, U) => {
+                if(Bibi) this.Bibi = Bibi;
+                if(parent && parent != window) return this.log = () => true;
+                this.log.Limit = U.hasOwnProperty('log') && typeof (U['log'] *= 1) == 'number' ? U['log'] : 2;
+                this.log.Depth = 1;
+                this.log.NStyle = 'font: normal normal 10px/1 Menlo, Consolas, monospace;';
+                this.log.BStyle = 'font: normal bold   10px/1 Menlo, Consolas, monospace;';
+                this.log.distill = (sML.UA.Trident || sML.UA.EdgeHTML) ?
+                    (Logs, Styles) => [Logs.join(' ').replace(/%c/g, '')]               : // Ignore Styles
+                    (Logs, Styles) => [Logs.join(' ')                   ].concat(Styles);
+                this.log.log = (Method, Logs, Styles, Obj) => {
+                    const Args = this.log.distill(Logs, Styles);
+                    if(Obj) Args.push(Obj);
+                    console[Method].apply(console, Args);
+                };
+            };
+
+        this.error = (Err) => {
+            this.Busy = false;
+            this.HTML.classList.remove('busy');
+            this.HTML.classList.remove('loading');
+            this.HTML.classList.remove('waiting');
+            if(this.I && typeof this.I.note == 'function') this.I.note(Err, 99999999999, 'ErrorOccured');
+            this.log(Err, '<e/>');
+            if(this.E) this.E.dispatch('bibi:x_x', typeof Err == 'string' ? new Error(Err) : Err);
+        };
+        
+        this.getTimeLabel = (TimeFromOrigin = Date.now() - this.Bibi.TimeOrigin) => [
+            TimeFromOrigin / 1000 / 60 / 60,
+            TimeFromOrigin / 1000 / 60 % 60,
+            TimeFromOrigin / 1000 % 60
+        ].map(Val => String(Math.floor(Val)).padStart(2, 0)).join(':') + '.' + String(TimeFromOrigin % 1000).padStart(3, 0);
+        
+        this.stamp = (What, TimeCard = this.TimeCard) => {
+            const TimeFromOrigin = Date.now() - this.Bibi.TimeOrigin;
+            const TimeLabel = this.getTimeLabel(TimeFromOrigin);
+            if(!TimeCard[TimeLabel]) TimeCard[TimeLabel] = [];
+            TimeCard[TimeLabel].push(What);
+            return TimeFromOrigin;
+        };
     }
 
     initialize(Bibi, I, S, R, U, B, L, E, X) {
@@ -36,106 +144,6 @@ export default class Operator {
         const Session = new SessionManager();
         O.Cookies = Session.Cookies;
         O.Biscuits = Session.Biscuits;
-        
-        
-        O.log = (Log, A2, A3) => { let Obj = '', Tag = '';
-                 if(A3)      Obj = A2, Tag = A3;
-            else if(/^<..>$/.test(A2)) Tag = A2;
-            else if(A2)      Obj = A2;
-            switch(Tag) {
-                case '<e/>': return console.error(Log);
-                case '</g>': O.log.Depth--;
-            }
-            if(
-                (Log || Obj)
-                    &&
-                (O.log.Depth <= O.log.Limit || Tag == '<b:>' || Tag == '</b>' || Tag == '<*/>')
-            ) {
-                const Time = (O.log.Depth <= 1) ? O.stamp(Log) : 0;
-                let Ls = [], Ss = [];
-                if(Log) switch(Tag) {
-                    case '<b:>': Ls.unshift(`📕`); Ls.push('%c' + Log), Ss.push(O.log.BStyle);                 Ls.push(`%c(v${ Bibi['version'] })` + (Bibi.Dev ? ':%cDEV' : '')), Ss.push(O.log.NStyle); if(Bibi.Dev) Ss.push(O.log.BStyle); break;
-                    case '</b>': Ls.unshift(`📖`); Ls.push('%c' + Log), Ss.push(O.log.BStyle); if(O.log.Limit) Ls.push(`%c(${ Math.floor(Time / 1000) + '.' + String(Time % 1000).padStart(3, 0) }sec)`), Ss.push(O.log.NStyle); break;
-                    case '<g:>': Ls.unshift(`┌`); Ls.push(Log); break;
-                    case '</g>': Ls.unshift(`└`); Ls.push(Log); break;
-                  //case '<o/>': Ls.unshift( `>`); Ls.push(Log); break;
-                    default    : Ls.unshift( `-`); Ls.push(Log);
-                }
-                for(let i = O.log.Depth; i > 1; i--) Ls.unshift('│');
-                Ls.unshift('%cBibi:'); Ss.unshift(O.log.NStyle);
-                switch(Tag) {
-                  //case '<o/>': O.log.log('groupCollapsed', Ls, Ss); console.log(Obj); console.groupEnd(); break;
-                    default    : O.log.log('log',            Ls, Ss,              Obj                    );
-                }
-            }
-            switch(Tag) {
-                case '<g:>': O.log.Depth++;
-            }
-        };
-        
-            O.log.initialize = () => {
-                if(parent && parent != window) return O.log = () => true;
-                O.log.Limit = U.hasOwnProperty('log') && typeof (U['log'] *= 1) == 'number' ? U['log'] : 0;
-                O.log.Depth = 1;
-                O.log.NStyle = 'font: normal normal 10px/1 Menlo, Consolas, monospace;';
-                O.log.BStyle = 'font: normal bold   10px/1 Menlo, Consolas, monospace;';
-                O.log.distill = (sML.UA.Trident || sML.UA.EdgeHTML) ?
-                    (Logs, Styles) => [Logs.join(' ').replace(/%c/g, '')]               : // Ignore Styles
-                    (Logs, Styles) => [Logs.join(' ')                   ].concat(Styles);
-                O.log.log = (Method, Logs, Styles, Obj) => {
-                    const Args = O.log.distill(Logs, Styles);
-                    if(Obj) Args.push(Obj);
-                    console[Method].apply(console, Args);
-                };
-            };
-        /*
-        O.logSets = (...Args) => {
-            let Repeats = [], Sets = []; Sets.length = 1;
-            Args.reverse();
-            for(let i = 0; i < Args.length; i++) {
-                if(!Array.isArray(Args[i])) Args[i] = [Args[i]];
-                Repeats[i] = Sets.length;
-                Sets.length = Sets.length * Args[i].length;
-            }
-            Args.reverse(), Repeats.reverse();
-            for(let i = 0; i < Sets.length; i++) Sets[i] = '';
-            Args.forEach((_AA, i) => {
-                let s = 0;
-                while(s < Sets.length) _AA.forEach(_A => {
-                    let r = Repeats[i];
-                    while(r--) Sets[s++] += _A;
-                });
-            });
-            Sets.forEach(Set => console.log('- ' + Set + ': ' + eval(Set)));
-        };*/
-        
-        
-        O.error = (Err) => {
-            O.Busy = false;
-            O.HTML.classList.remove('busy');
-            O.HTML.classList.remove('loading');
-            O.HTML.classList.remove('waiting');
-            I.note(Err, 99999999999, 'ErrorOccured');
-            O.log(Err, '<e/>');
-            E.dispatch('bibi:x_x', typeof Err == 'string' ? new Error(Err) : Err);
-        };
-        
-        
-        O.TimeCard = {};
-        
-        O.getTimeLabel = (TimeFromOrigin = Date.now() - Bibi.TimeOrigin) => [
-            TimeFromOrigin / 1000 / 60 / 60,
-            TimeFromOrigin / 1000 / 60 % 60,
-            TimeFromOrigin / 1000 % 60
-        ].map(Val => String(Math.floor(Val)).padStart(2, 0)).join(':') + '.' + String(TimeFromOrigin % 1000).padStart(3, 0);
-        
-        O.stamp = (What, TimeCard = O.TimeCard) => {
-            const TimeFromOrigin = Date.now() - Bibi.TimeOrigin;
-            const TimeLabel = O.getTimeLabel(TimeFromOrigin);
-            if(!TimeCard[TimeLabel]) TimeCard[TimeLabel] = [];
-            TimeCard[TimeLabel].push(What);
-            return TimeFromOrigin;
-        };
         
         
         O.isToBeExtractedIfNecessary = (Path) => {
@@ -240,40 +248,6 @@ export default class Operator {
                 resolve(Source);
              }).catch(reject);
         });
-        
-        
-        O.isBin = (Source) => /\.(aac|gif|jpe?g|m4[av]|mp[g34]|ogg|[ot]tf|pdf|png|web[mp]|woff2?)$/i.test(Source.Path);
-        
-        O.createBlobURL = (DT, CB, MT) => URL.createObjectURL(DT == 'Text' ? new Blob([CB], { type: MT }) : CB);
-        
-        
-        O.ContentTypes = {
-            'pdf'     : 'application/pdf',
-            'xht(ml)?': 'application/xhtml+xml',
-            'xml'     : 'application/xml',
-            'aac'     :       'audio/aac',
-            'mp3'     :       'audio/mpeg',
-            'otf'     :        'font/opentype',
-            'ttf'     :        'font/truetype',
-            'woff'    :        'font/woff',
-            'woff2'   :        'font/woff2',
-            'gif'     :       'image/gif',
-            'jpe?g'   :       'image/jpeg',
-            'png'     :       'image/png',
-            'svg'     :       'image/svg+xml',
-            'webp'    :       'image/webp',
-            'css'     :        'text/css',
-            'js'      :        'text/javascript',
-            'html?'   :        'text/html',
-            'mp4'     :       'video/mp4',
-            'webm'    :       'video/webm',
-            'ya?ml'   : 'application/x-yaml'
-        };
-        
-        O.getContentType = (FileName) => {
-            for(const Ext in O.ContentTypes) if(new RegExp('\\.' + Ext + '$').test(FileName)) return O.ContentTypes[Ext];
-            return null;
-        };
         
         
         O.preprocess = (Source) => {

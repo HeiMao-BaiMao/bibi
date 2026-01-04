@@ -3,6 +3,7 @@ import sML from 'sml.js';
 export default class Spinner {
     constructor(I) {
         this.I = I;
+        this.I.Spinner = this;
         const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
         Object.assign(this, {
             create: () => {
