@@ -8,8 +8,8 @@ export default class Menu {
         if(!S['use-menubar']) O.HTML.classList.add('without-menubar');
         const Menu = this.I.Menu = O.Body.appendChild(sML.create('div', { id: 'bibi-menu' }, this.I.Menu)); delete Menu.create;
         //Menu.addEventListener('click', Eve => Eve.stopPropagation());
-        this.I.TouchObserver.setElementHoverActions(Menu);
-        this.I.setToggleAction(Menu, {
+        I.TouchObserver.setElementHoverActions(Menu);
+        I.setToggleAction(Menu, {
         onopened: () => { O.HTML.classList.add(   'menu-opened'); E.dispatch('bibi:opened-menu'); },
         onclosed: () => { O.HTML.classList.remove('menu-opened'); E.dispatch('bibi:closed-menu'); }
         });
@@ -34,7 +34,7 @@ export default class Menu {
         }*/
         if(!O.TouchOS) E.add('bibi:opened', () => {
         E.add('bibi:moved-pointer', Eve => {
-        if(this.I.isPointerStealth()) return false;
+        if(I.isPointerStealth()) return false;
         const BibiEvent = O.getBibiEvent(Eve);
         clearTimeout(Menu.Timer_close);
         if(BibiEvent.Division.Y == 'top') { //if(BibiEvent.Coord.Y < Menu.Height * 1.5) {
@@ -60,8 +60,8 @@ export default class Menu {
         sML.appendCSSRule(_Common + _M, 'width: calc(100% - ' + O.Scrollbars.Width + 'px);');
         sML.appendCSSRule([_Common + '.panel-opened' + _M, _Common + '.subpanel-opened' + _M].join(', '), 'padding-right: ' + O.Scrollbars.Width + 'px;');
         }
-        this.I.OpenedSubpanel = null;
-        this.I.Subpanels = [];
+        I.OpenedSubpanel = null;
+        I.Subpanels = [];
         Menu.Config.create();
         E.dispatch('bibi:created-menu');
         }};
@@ -78,7 +78,7 @@ export default class Menu {
         delete this.I.Menu.Config;
         return;
         }
-        const Config = Menu.Config = sML.applyRtL(this.I.createSubpanel({ id: 'bibi-subpanel_config' }), Menu.Config); delete Config.create;
+        const Config = Menu.Config = sML.applyRtL(I.createSubpanel({ id: 'bibi-subpanel_config' }), Menu.Config); delete Config.create;
         const Opener = Config.bindOpener(Menu.R.addButtonGroup({ Sticky: true }).addButton({
         Type: 'toggle',
         Labels: {
@@ -95,9 +95,8 @@ export default class Menu {
         }};
         
         this.I.Menu.Config.ViewModeSection = { create: () => {
-        const Config = this.I.Menu.Config;
-        const /* SpreadShapes */ SSs = (/* SpreadShape */ SS => SS + SS + SS)((/* ItemShape */ IS => `<span class="bibi-shape bibi-shape-spread">${ IS + IS }</span>`)(`<span class="bibi-shape bibi-shape-item"></span>`));
-        const Section = Config.ViewModeSection = Config.addSection({
+        const SSs = (/* SpreadShape */ SS => SS + SS + SS)((/* ItemShape */ IS => `<span class="bibi-shape bibi-shape-spread">${ IS + IS }</span>`)(`<span class="bibi-shape bibi-shape-item"></span>`));
+        const Section = I.Menu.Config.ViewModeSection = I.Menu.Config.addSection({
         Labels: { default: { default: `View Mode`, ja: `閲覧モード` } },
         ButtonGroups: [{
         ButtonType: 'radio',
@@ -138,22 +137,22 @@ export default class Menu {
         }]
         });
         E.add('bibi:updated-settings', () => {
-        Section.ButtonGroups[0].Buttons.forEach(Button => this.I.setUIState(Button, (Button.Mode == S.RVM ? 'active' : 'default')));
+        Section.ButtonGroups[0].Buttons.forEach(Button => I.setUIState(Button, (Button.Mode == S.RVM ? 'active' : 'default')));
         });/*
         E.add('bibi:updated-settings', () => {
         const ButtonGroup = Section.ButtonGroups[1];
         ButtonGroup.style.display = S.BRL == 'reflowable' ? '' : 'none';
-        ButtonGroup.Buttons.forEach(Button => this.I.setUIState(Button, S[Button.Name] ? 'active' : 'default'));
+        ButtonGroup.Buttons.forEach(Button => I.setUIState(Button, S[Button.Name] ? 'active' : 'default'));
         });*/
         E.add('bibi:updated-settings', () => {
         const ButtonGroup = Section.ButtonGroups[Section.ButtonGroups.length - 1];
         ButtonGroup.style.display = S.BRL == 'pre-paginated' ? '' : 'none';
-        ButtonGroup.Buttons.forEach(Button => this.I.setUIState(Button, S[Button.Name] ? 'active' : 'default'));
+        ButtonGroup.Buttons.forEach(Button => I.setUIState(Button, S[Button.Name] ? 'active' : 'default'));
         });
         }};
         
         this.I.Menu.Config.WindowSection = { create: (Components) => {
-        const Config = this.I.Menu.Config;
+        const Config = I.Menu.Config;
         const Buttons = [];
         if(Components.includes('NewWindowButton')) {
         Buttons.push({
@@ -186,11 +185,11 @@ export default class Menu {
         if(this.fullscreenElement == O.FullscreenTarget) {
         O.Fullscreen = true;
         O.HTML.classList.add('fullscreen');
-        this.I.setUIState(O.FullscreenButton, 'active');
+        I.setUIState(O.FullscreenButton, 'active');
         } else if(O.Fullscreen) {
         O.Fullscreen = false;
         O.HTML.classList.remove('fullscreen');
-        this.I.setUIState(O.FullscreenButton, 'default');
+        I.setUIState(O.FullscreenButton, 'default');
         }
         });
         }
@@ -201,7 +200,7 @@ export default class Menu {
         }};
         
         this.I.Menu.Config.LinkageSection = { create: (Components) => {
-        const Config = this.I.Menu.Config;
+        const Config = I.Menu.Config;
         const Buttons = [];
         if(Components.includes('WebsiteLink')) Buttons.push({
         Type: 'link',

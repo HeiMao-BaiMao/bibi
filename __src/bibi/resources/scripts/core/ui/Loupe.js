@@ -12,14 +12,14 @@ export default class Loupe {
         CurrentTransformation: { Scale: 1, TranslateX: 0, TranslateY: 0 },
         defineZoomOutPropertiesForUtilities: () => {
         const BookMargin = {
-        Top: S['use-menubar'] && S['use-full-height'] ? this.I.Menu.Height : 0,
-        Right: S.ARA == 'vertical'   ? this.I.Slider.Size : 0,
-        Bottom: S.ARA == 'horizontal' ? this.I.Slider.Size : 0,
+        Top: S['use-menubar'] && S['use-full-height'] ? I.Menu.Height : 0,
+        Right: S.ARA == 'vertical'   ? I.Slider.Size : 0,
+        Bottom: S.ARA == 'horizontal' ? I.Slider.Size : 0,
         Left: 0
         };
         const Tfm = {};
         if(S.ARA == 'horizontal') {
-        Tfm.Scale = (R.Main.offsetHeight - (BookMargin.Top + BookMargin.Bottom)) / (R.Main.offsetHeight - (S.ARA == S.SLA && (S.RVM != 'paged' || this.I.Slider.ownerDocument) ? O.Scrollbars.Height : 0));
+        Tfm.Scale = (R.Main.offsetHeight - (BookMargin.Top + BookMargin.Bottom)) / (R.Main.offsetHeight - (S.ARA == S.SLA && (S.RVM != 'paged' || I.Slider.ownerDocument) ? O.Scrollbars.Height : 0));
         Tfm.TranslateX = 0;
         } else {
         Tfm.Scale = Math.min(
@@ -32,7 +32,7 @@ export default class Loupe {
         Tfm.TranslateY = BookMargin.Top - (R.Main.offsetHeight) * (1 - Tfm.Scale) / 2;
         const St = (O.Body['offset' + C.A_SIZE_L] / Tfm.Scale - R.Main['offset' + C.A_SIZE_L]);
         const OP = {};
-        OP[C.A_BASE_B] = St / 2 + (!S['use-full-height'] && S.ARA == 'vertical' ? this.I.Menu.Height : 0);
+        OP[C.A_BASE_B] = St / 2 + (!S['use-full-height'] && S.ARA == 'vertical' ? I.Menu.Height : 0);
         OP[C.A_BASE_A] = St / 2;
         const IP = {};
         if(S.ARA == S.SLA) IP[S.ARA == 'horizontal' ? 'Right' : 'Bottom'] = St / 2;
@@ -73,8 +73,8 @@ export default class Loupe {
         if(Tfm.Scale > 1) {
         const OverflowX = window.innerWidth  * (0.5 * (Tfm.Scale - 1)),
         OverflowY = window.innerHeight * (0.5 * (Tfm.Scale - 1));
-        Tfm.TranslateX = sML.limitMinMax(Tfm.TranslateX, OverflowX * -1 - (S.RVM != 'vertical' ? 0 : this.I.Slider.UIState == 'active' ? this.I.Slider.Size - O.Scrollbars.Width  : 0) + O.Scrollbars.Width , OverflowX);
-        Tfm.TranslateY = sML.limitMinMax(Tfm.TranslateY, OverflowY * -1 - (S.RVM == 'vertical' ? 0 : this.I.Slider.UIState == 'active' ? this.I.Slider.Size - O.Scrollbars.Height : 0) + O.Scrollbars.Height, OverflowY + (this.I.Menu.UIState == 'active' ? this.I.Menu.Height : 0));
+        Tfm.TranslateX = sML.limitMinMax(Tfm.TranslateX, OverflowX * -1 - (S.RVM != 'vertical' ? 0 : I.Slider.UIState == 'active' ? I.Slider.Size - O.Scrollbars.Width  : 0) + O.Scrollbars.Width , OverflowX);
+        Tfm.TranslateY = sML.limitMinMax(Tfm.TranslateY, OverflowY * -1 - (S.RVM == 'vertical' ? 0 : I.Slider.UIState == 'active' ? I.Slider.Size - O.Scrollbars.Height : 0) + O.Scrollbars.Height, OverflowY + (I.Menu.UIState == 'active' ? I.Menu.Height : 0));
         }
         Loupe.CurrentTransformation = Tfm;
         const ATfm = Loupe.getActualTransformation(Tfm);
@@ -147,7 +147,7 @@ export default class Loupe {
         Loupe.BookStretchingEach = 0;
         };
         }
-        return Loupe.transform(null, { Temporary: true }).then(cb).then(() => this.I.Slider.ownerDocument ? this.I.Slider.progress() : undefined);
+        return Loupe.transform(null, { Temporary: true }).then(cb).then(() => I.Slider.ownerDocument ? I.Slider.progress() : undefined);
         },
         isAvailable: () => {
         if(!L.Opened) return false;
@@ -166,7 +166,7 @@ export default class Loupe {
         return BibiEvent;
         },
         onTap: (Eve, HowManyTaps) => {
-        if(HowManyTaps == 1 && (!this.I.KeyObserver.ActiveKeys || !this.I.KeyObserver.ActiveKeys['Space'])) return Promise.resolve(); // Requires pressing space-key on single-tap.
+        if(HowManyTaps == 1 && (!I.KeyObserver.ActiveKeys || !I.KeyObserver.ActiveKeys['Space'])) return Promise.resolve(); // Requires pressing space-key on single-tap.
         const BibiEvent = Loupe.checkAndGetBibiEventForTaps(Eve);
         if(!BibiEvent) return Promise.resolve();
         //if(HowManyTaps > 1 && (BibiEvent.Division.X != 'center' || BibiEvent.Division.Y != 'middle')) return Promise.resolve();
@@ -190,7 +190,7 @@ export default class Loupe {
         delete Loupe.PointerDownTransformation;
         },
         onPointerMove: (Eve) => {
-        if(this.I.PinchObserver.Hot) return false;
+        if(I.PinchObserver.Hot) return false;
         if(!Loupe.isAvailable()) return false;
         if(Loupe.CurrentTransformation.Scale == 1 || !Loupe.PointerDownCoord) return false;
         Eve.preventDefault();
@@ -207,12 +207,12 @@ export default class Loupe {
         Loupe.Timer_TransitionRestore = setTimeout(() => sML.style(R.Main, { transition: '' }, { cursor: '' }), 234);
         }
         };
-        this.I.isPointerStealth.addChecker(() => {
+        I.isPointerStealth.addChecker(() => {
         if(Loupe.Dragging) return true;
-        if(!this.I.KeyObserver.ActiveKeys || !this.I.KeyObserver.ActiveKeys['Space']) return false;
+        if(!I.KeyObserver.ActiveKeys || !I.KeyObserver.ActiveKeys['Space']) return false;
         return true;
         });
-        this.I.setToggleAction(Loupe, {
+        I.setToggleAction(Loupe, {
         onopened: () => {
         //Loupe.defineZoomOutPropertiesForUtilities();
         O.HTML.classList.add('loupe-active');
@@ -240,7 +240,7 @@ export default class Loupe {
         E.add('bibi:laid-out', () => Loupe.defineZoomOutPropertiesForUtilities());
         E.add('bibi:changed-view',  () => Loupe.transformToDefault());
         if(S['use-loupe']) {
-        const ButtonGroup = this.I.Menu.R.addButtonGroup({
+        const ButtonGroup = I.Menu.R.addButtonGroup({
         Sticky: true,
         Tiled: true,
         id: 'bibi-buttongroup_loupe',
@@ -249,19 +249,19 @@ export default class Loupe {
         Icon: `<span class="bibi-icon bibi-icon-loupe bibi-icon-loupe-zoomin"></span>`,
         Help: true,
         action: () => Loupe.scale(Loupe.CurrentTransformation.Scale * S['loupe-scale-per-step']),
-        updateState: function(State) { this.I.setUIState(this, typeof State == 'string' ? State : (Loupe.CurrentTransformation.Scale >= S['loupe-max-scale']) ? 'disabled' : 'default'); }
+        updateState: function(State) { I.setUIState(this, typeof State == 'string' ? State : (Loupe.CurrentTransformation.Scale >= S['loupe-max-scale']) ? 'disabled' : 'default'); }
         }, { 
         Labels: { default: { default: `Reset Zoom-in/out`, ja: `元のサイズに戻す` } },
         Icon: `<span class="bibi-icon bibi-icon-loupe bibi-icon-loupe-reset"></span>`,
         Help: true,
         action: () => Loupe.scale(1),
-        updateState: function(State) { this.I.setUIState(this, typeof State == 'string' ? State : (Loupe.CurrentTransformation.Scale == 1) ? 'disabled' : 'default'); }
+        updateState: function(State) { I.setUIState(this, typeof State == 'string' ? State : (Loupe.CurrentTransformation.Scale == 1) ? 'disabled' : 'default'); }
         }, {
         Labels: { default: { default: `Zoom-out`, ja: `縮小する` } },
         Icon: `<span class="bibi-icon bibi-icon-loupe bibi-icon-loupe-zoomout"></span>`,
         Help: true,
         action: () => Loupe.scale(Loupe.CurrentTransformation.Scale / S['loupe-scale-per-step']),
-        updateState: function(State) { this.I.setUIState(this, typeof State == 'string' ? State : (Loupe.CurrentTransformation.Scale <= 1) ? 'disabled' : 'default'); }
+        updateState: function(State) { I.setUIState(this, typeof State == 'string' ? State : (Loupe.CurrentTransformation.Scale <= 1) ? 'disabled' : 'default'); }
         }]
         });
         Loupe.updateButtonState = (State) => ButtonGroup.Buttons.forEach(Button => Button.updateState(State));

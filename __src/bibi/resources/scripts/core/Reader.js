@@ -628,7 +628,7 @@ export default class Reader {
         this.E.dispatch('bibi:is-going-to:focus-on', Par);
         this.Moving = true;
         Par.FocusPoint = 0;
-        if(this.S['book-rendition-layout'] == 'reflowable') {
+        if(_.Page.Item['rendition:layout'] == 'reflowable') {
             if(typeof _.Point == 'number') {
                 Par.FocusPoint = _.Point;
             } else {
@@ -638,9 +638,9 @@ export default class Reader {
             }
             if(this.S.SLD == 'rtl') Par.FocusPoint -= this.Stage.Width;
         } else {
-            if(this.Stage[this.C.L_SIZE_L] >= _.Page.Spread['offset' + this.C.L_SIZE_L]) {
-                Par.FocusPoint = this.O.getElementCoord(_.Page.Spread)[this.C.L_AXIS_L];
-                Par.FocusPoint -= Math.floor((this.Stage[this.C.L_SIZE_L] - _.Page.Spread['offset' + this.C.L_SIZE_L]) / 2);
+            if(this.Stage[this.C.L_SIZE_L] >= _.Page.Spread.Box['offset' + this.C.L_SIZE_L]) {
+                Par.FocusPoint = this.O.getElementCoord(_.Page.Spread.Box)[this.C.L_AXIS_L];
+                Par.FocusPoint -= Math.floor((this.Stage[this.C.L_SIZE_L] - _.Page.Spread.Box['offset' + this.C.L_SIZE_L]) / 2);
             } else {
                 Par.FocusPoint = this.O.getElementCoord(_.Page)[this.C.L_AXIS_L];
                 if(this.Stage[this.C.L_SIZE_L] > _.Page['offset' + this.C.L_SIZE_L]) Par.FocusPoint -= Math.floor((this.Stage[this.C.L_SIZE_L] - _.Page['offset' + this.C.L_SIZE_L]) / 2);
@@ -846,13 +846,13 @@ export default class Reader {
         if(typeof Par.Distance != 'number' || !isFinite(Par.Distance) || !Par.Distance) return reject();
         //Par.Distance = Par.Distance < 0 ? -1 : 1;
         this.E.dispatch('bibi:is-going-to:move-by', Par);
-        const Current = (Par.Distance > 0 ? this.I.PageObserver.Current.List.slice(-1) : this.I.PageObserver.Current.List)[0], CurrentPage = Current.Page, CurrentItem = CurrentPage.Item;
+        const Current = (Par.Distance > 0 ? this.I.PageObserver.Current.List.slice(-1) : this.I.PageObserver.Current.List)[0];
+        if(!Current) return reject();
+        const CurrentPage = Current.Page, CurrentItem = CurrentPage.Item;
         let Promised = null;
         if(
-            true ||
+            this.S.RVM == 'paged' ||
             this.Columned ||
-            this.S.BRL == 'pre-paginated' ||
-            this.S.BRL == 'reflowable' && this.S.RVM == 'paged' ||
             CurrentItem['rendition:layout'] == 'pre-paginated' ||
             CurrentItem.Outsourcing ||
             CurrentItem.Pages.length == 1 ||
@@ -879,12 +879,16 @@ export default class Reader {
                  if(DestinationPageIndex <                  0) DestinationPageIndex = 0,                  Side = 'before';
             else if(DestinationPageIndex > this.Pages.length - 1) DestinationPageIndex = this.Pages.length - 1, Side = 'after';
             let DestinationPage = this.Pages[DestinationPageIndex];
-            if(this.S.BRL == 'pre-paginated' && DestinationPage.Item.SpreadPair) {
-                if(this.S.SLA == 'horizontal' && this.Stage[this.C.L_SIZE_L] > DestinationPage.Spread['offset' + this.C.L_SIZE_L]) {
-                    if(Par.Distance < 0 && DestinationPage.IndexInSpread == 0) DestinationPage = DestinationPage.Spread.Pages[1];
-                    if(Par.Distance > 0 && DestinationPage.IndexInSpread == 1) DestinationPage = DestinationPage.Spread.Pages[0];
+            
+            // Ensure we move to a different spread if in paged mode and current spread is fully visible
+            if(this.S.RVM == 'paged' && DestinationPage.Spread == CurrentPage.Spread && !Current.PageIntersectionStatus.Oversized) {
+                const NextIndex = DestinationPageIndex + (Par.Distance > 0 ? 1 : -1);
+                if(this.Pages[NextIndex]) {
+                    DestinationPageIndex = NextIndex;
+                    DestinationPage = this.Pages[DestinationPageIndex];
                 }
             }
+
             Par.Destination = { Page: DestinationPage, Side: Side };
             Promised = this.focusOn(Par).then(() => Par.Destination);
         } else {

@@ -18,28 +18,28 @@ export default class Slider {
                         Slider.Rail    = EdgebarBox.appendChild(sML.create('div', { id: 'bibi-slider-rail' }));
                         Slider.RailGroove   = Slider.Rail.appendChild(sML.create('div', { id: 'bibi-slider-rail-groove' }));
                         Slider.RailProgress = Slider.RailGroove.appendChild(sML.create('div', { id: 'bibi-slider-rail-progress' }));
-                        Slider.Thumb   = EdgebarBox.appendChild(sML.create('div', { id: 'bibi-slider-thumb', Labels: { default: { default: `Slider Thumb`, ja: `スライダー上の好きな位置からドラッグを始められます` } } })); this.I.setFeedback(Slider.Thumb);
+                        Slider.Thumb   = EdgebarBox.appendChild(sML.create('div', { id: 'bibi-slider-thumb', Labels: { default: { default: `Slider Thumb`, ja: `スライダー上の好きな位置からドラッグを始められます` } } })); I.setFeedback(Slider.Thumb);
                         if(S['use-history']) {
                             Slider.classList.add('bibi-slider-with-history');
                             Slider.History        = Slider.appendChild(sML.create('div', { id: 'bibi-slider-history' }));
-                            Slider.History.add    = (Destination) => this.I.History.add({ UI: Slider, SumUp: false, Destination: Destination })
-                            Slider.History.Button = Slider.History.appendChild(this.I.createButtonGroup()).addButton({ id: 'bibi-slider-history-button',
+                            Slider.History.add    = (Destination) => I.History.add({ UI: Slider, SumUp: false, Destination: Destination })
+                            Slider.History.Button = Slider.History.appendChild(I.createButtonGroup()).addButton({ id: 'bibi-slider-history-button',
                                 Type: 'normal',
                                 Labels: { default: { default: `History Back`, ja: `移動履歴を戻る` } },
                                 Help: false,
                                 Icon: `<span class="bibi-icon bibi-icon-history"></span>`,
-                                action: () => this.I.History.back(),
+                                action: () => I.History.back(),
                                 update: function() {
-                                    this.Icon.style.transform = `rotate(${ 360 * (this.I.History.List.length - 1) }deg)`;
-                                    if(this.I.History.List.length <= 1) this.I.setUIState(this, 'disabled');
-                                    else if(this.UIState == 'disabled') this.I.setUIState(this, 'default');
+                                    this.Icon.style.transform = `rotate(${ 360 * (I.History.List.length - 1) }deg)`;
+                                    if(I.History.List.length <= 1) I.setUIState(this, 'disabled');
+                                    else if(this.UIState == 'disabled') I.setUIState(this, 'default');
                                 }
                             });
-                            this.I.History.Updaters.push(() => Slider.History.Button.update());
+                            I.History.Updaters.push(() => Slider.History.Button.update());
                         }
                         if(S['use-nombre']) {
-                            E.add(Slider.Edgebar, ['mouseover', 'mousemove'], Eve => { if(!Slider.Touching) this.I.Nombre.progress({ List: [{ Page: Slider.getPointedPage(O.getBibiEventCoord(Eve)[C.A_AXIS_L]) }] }); });
-                            E.add(Slider.Edgebar,  'mouseout',                Eve => { if(!Slider.Touching) this.I.Nombre.progress(); });
+                            E.add(Slider.Edgebar, ['mouseover', 'mousemove'], Eve => { if(!Slider.Touching) I.Nombre.progress({ List: [{ Page: Slider.getPointedPage(O.getBibiEventCoord(Eve)[C.A_AXIS_L]) }] }); });
+                            E.add(Slider.Edgebar,  'mouseout',                Eve => { if(!Slider.Touching) I.Nombre.progress(); });
                         }
                     },
                     resetUISize: () => {
@@ -58,7 +58,7 @@ export default class Slider {
                         Slider.Thumb.Length = Slider.Thumb['offset' + C.A_SIZE_L];
                     },
                     onTouchStart: (Eve) => {
-                        this.I.ScrollObserver.forceStopScrolling();
+                        I.ScrollObserver.forceStopScrolling();
                         Eve.preventDefault();
                         Slider.Touching = true;
                         Slider.StartedAt = {
@@ -111,12 +111,12 @@ export default class Slider {
                     flip: (TouchedCoord, Force) => new Promise(resolve => { switch(S.RVM) {
                         case 'paged':
                             const TargetPage = Slider.getPointedPage(TouchedCoord);
-                            return this.I.PageObserver.Current.Pages.includes(TargetPage) ? resolve() : R.focusOn({ Destination: TargetPage, Duration: 0 }).then(() => resolve());
+                            return I.PageObserver.Current.Pages.includes(TargetPage) ? resolve() : R.focusOn({ Destination: TargetPage, Duration: 0 }).then(() => resolve());
                         default:
                             R.Main['scroll' + C.L_OOBL_L] = Slider.StartedAt.MainScrollBefore + (TouchedCoord - Slider.StartedAt.Coord) * (Slider.MainLength / Slider.Edgebar.Length);
                             return resolve();
                     } }).then(() => {
-                        if(Force) this.I.PageObserver.turnItems();
+                        if(Force) I.PageObserver.turnItems();
                     }),
                     progress: () => {
                         if(Slider.Touching) return;
@@ -149,7 +149,7 @@ export default class Slider {
                     }
                 }));
                 Slider.initialize();
-                this.I.setToggleAction(Slider, {
+                I.setToggleAction(Slider, {
                     onopened: () => {
                         O.HTML.classList.add('slider-opened');
                         setTimeout(Slider.resetUISize, 0);

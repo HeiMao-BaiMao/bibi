@@ -4,28 +4,28 @@ export default class Arrows {
     constructor(I) {
         this.I = I;
         const Bibi = I.Bibi; const O = I.O; const S = I.S; const E = I.E; const R = I.R; const L = I.L;
-        this.I.Arrows = { create: () => { if(!S['use-arrows']) return this.I.Arrows = null;
-        const Arrows = this.I.Arrows = {
+        this.I.Arrows = { create: () => { if(!S['use-arrows']) return I.Arrows = null;
+        const Arrows = I.Arrows = {
         navigate: () => setTimeout(() => {
-        [Arrows.Back, Arrows.Forward].forEach(Arrow => this.I.Flipper.isAbleToFlip(Arrow.Distance) ? Arrow.classList.add('glowing') : false);
+        [Arrows.Back, Arrows.Forward].forEach(Arrow => I.Flipper.isAbleToFlip(Arrow.Distance) ? Arrow.classList.add('glowing') : false);
         setTimeout(() => [Arrows.Back, Arrows.Forward].forEach(Arrow => Arrow.classList.remove('glowing')), 1234);
         }, 400),
         toggleState: () => [Arrows.Back, Arrows.Forward].forEach(Arrow => {
-        const Availability = this.I.Flipper.isAbleToFlip(Arrow.Distance);
+        const Availability = I.Flipper.isAbleToFlip(Arrow.Distance);
         Arrow.classList.toggle(  'available',  Availability);
         Arrow.classList.toggle('unavailable', !Availability);
         }),
         areAvailable: (BibiEvent) => {
         if(!L.Opened) return false;
-        if(this.I.OpenedSubpanel) return false;
-        if(this.I.Panel && this.I.Panel.UIState == 'active') return false;
-        //if(BibiEvent.Coord.Y < this.I.Menu.Height/* * 1.5*/) return false;
+        if(I.OpenedSubpanel) return false;
+        if(I.Panel && I.Panel.UIState == 'active') return false;
+        //if(BibiEvent.Coord.Y < I.Menu.Height/* * 1.5*/) return false;
         const Buf = 3;
         if(BibiEvent.Coord.X <= Buf || BibiEvent.Coord.Y <= Buf) return false;
         else if(S.ARA == 'horizontal') { if(BibiEvent.Coord.X >= window.innerWidth  - Buf || BibiEvent.Coord.Y >= window.innerHeight - O.Scrollbars.Height - Buf) return false; }
         else if(S.ARA == 'vertical'  ) { if(BibiEvent.Coord.Y >= window.innerHeight - Buf || BibiEvent.Coord.X >= window.innerWidth  - O.Scrollbars.Width  - Buf) return false; }
         if(BibiEvent.Target.ownerDocument.documentElement == O.HTML) {
-        if(BibiEvent.Target == O.HTML || BibiEvent.Target == O.Body || BibiEvent.Target == this.I.Menu) return true;
+        if(BibiEvent.Target == O.HTML || BibiEvent.Target == O.Body || BibiEvent.Target == I.Menu) return true;
         if(/^(bibi-main|bibi-arrow|bibi-help|bibi-poweredby)/.test(BibiEvent.Target.id)) return true;
         if(/^(spread|item|page)( |-|$)/.test(BibiEvent.Target.className)) return true;
         } else {
@@ -37,10 +37,10 @@ export default class Arrows {
         O.HTML.classList.add('arrows-active');
         Arrows.Back    = O.Body.appendChild(sML.create('div', { className: 'bibi-arrow', id: 'bibi-arrow-back',    Labels: { default: { default: `Back`,    ja: `戻る` } }, Distance: -1 }));
         Arrows.Forward = O.Body.appendChild(sML.create('div', { className: 'bibi-arrow', id: 'bibi-arrow-forward', Labels: { default: { default: `Forward`, ja: `進む` } }, Distance:  1 }));
-        Arrows[-1] = Arrows.Forward.Pair = this.I.Flipper.Back.Arrow    = Arrows.Back;
-        Arrows[ 1] = Arrows.Back.Pair    = this.I.Flipper.Forward.Arrow = Arrows.Forward;
+        Arrows[-1] = Arrows.Forward.Pair = I.Flipper.Back.Arrow    = Arrows.Back;
+        Arrows[ 1] = Arrows.Back.Pair    = I.Flipper.Forward.Arrow = Arrows.Forward;
         [Arrows.Back, Arrows.Forward].forEach(Arrow => {
-        this.I.setFeedback(Arrow);
+        I.setFeedback(Arrow);
         const FunctionsToBeCanceled = [Arrow.showHelp, Arrow.hideHelp, Arrow.BibiTapObserver.onTap, Arrow.BibiTapObserver.onDoubleTap];
         if(!O.TouchOS) FunctionsToBeCanceled.push(Arrow.BibiHoverObserver.onHover, Arrow.BibiHoverObserver.onUnHover);
         FunctionsToBeCanceled.forEach(f2BC => f2BC = () => {});
@@ -63,7 +63,7 @@ export default class Arrows {
         // Optimize to Scrollbar Size
         (_ => {
         _('html.appearance-horizontal.book-full-height:not(.slider-opened)',       'height', O.Scrollbars.Width);
-        _('html.appearance-horizontal:not(.book-full-height):not(.slider-opened)', 'height', O.Scrollbars.Width + this.I.Menu.Height);
+        _('html.appearance-horizontal:not(.book-full-height):not(.slider-opened)', 'height', O.Scrollbars.Width + I.Menu.Height);
         _('html.appearance-vertical:not(.slider-opened)',                          'width',  O.Scrollbars.Width);
         })((Context, WidthOrHeight, Margin) => sML.appendCSSRule(
         `${ Context } div#bibi-arrow-back, ${ Context } div#bibi-arrow-forward`,
