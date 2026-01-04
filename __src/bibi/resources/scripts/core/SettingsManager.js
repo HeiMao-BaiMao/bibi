@@ -199,7 +199,15 @@ export default class SettingsManager {
         return To;
     }
 
-    initialize(Bibi, O, E, U, D, P) {
+    initialize(Bibi, O, E, U, D, P, B, C) {
+        this.Bibi = Bibi;
+        this.O = O;
+        this.E = E;
+        this.U = U;
+        this.D = D;
+        this.P = P;
+        this.B = B;
+        this.C = C;
         // Clean up self
         for(const Pro in this) {
             if (Pro === 'Types' || Pro === 'Types_PresetOnly' || Pro === 'Types_UserOnly' || Pro === 'Verifiers') continue;
@@ -293,24 +301,24 @@ export default class SettingsManager {
         E.dispatch('bibi:initialized-settings');
     }
 
-    update(Settings, Bibi, O, E, R, C, B) {
+    update(Settings) {
         const Prev = {}; for(const Mode in this.Modes) Prev[Mode] = this[Mode];
         if(typeof Settings == 'object') for(const Property in Settings) if(typeof this[Property] != 'function') this[Property] = Settings[Property];
         
-        this['book-rendition-layout'] = B.Package.Metadata['rendition:layout'];
-        this['allow-placeholders'] = (this['allow-placeholders'] && B.AllowPlaceholderItems);
+        this['book-rendition-layout'] = this.B.Package.Metadata['rendition:layout'];
+        this['allow-placeholders'] = (this['allow-placeholders'] && this.B.AllowPlaceholderItems);
         
         if(this.FontFamilyStyleIndex) sML.deleteCSSRule(this.FontFamilyStyleIndex);
         if(this['ui-font-family']) this.FontFamilyStyleIndex = sML.appendCSSRule('html', 'font-family: ' + this['ui-font-family'] + ' !important;');
         
-        this['page-progression-direction'] = B.PPD;
+        this['page-progression-direction'] = this.B.PPD;
         
         if(this['pagination-method'] == 'x') {
             this['spread-layout-axis'] = this['reader-view-mode'] == 'vertical' ? 'vertical' : 'horizontal';
         } else {
             this['spread-layout-axis'] = (() => {
                 if(this['reader-view-mode'] != 'paged') return this['reader-view-mode'];
-                if(this['book-rendition-layout'] == 'reflowable') switch(B.WritingMode) {
+                if(this['book-rendition-layout'] == 'reflowable') switch(this.B.WritingMode) {
                     case 'tb-rl': case 'tb-lr': return   'vertical'; ////
                 }                               return 'horizontal';
             })();
@@ -323,11 +331,11 @@ export default class SettingsManager {
         
         for(const Mode in this.Modes) {
             const Pfx = this.Modes[Mode].CNP + '-', PC = Pfx + Prev[Mode], CC = Pfx + this[Mode];
-            if(PC != CC) O.HTML.classList.remove(PC);
-            O.HTML.classList.add(CC);
+            if(PC != CC) this.O.HTML.classList.remove(PC);
+            this.O.HTML.classList.add(CC);
         }
         
-        C.update();
-        E.dispatch('bibi:updated-settings', this);
+        this.C.update();
+        this.E.dispatch('bibi:updated-settings', this);
     }
 }
