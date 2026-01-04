@@ -138,7 +138,7 @@ Bibi.initialize = () => {
         S.initialize(Bibi, O, E, U, D, P, B, C);
         L.initialize(Bibi, O, S, E, I, B, R, D, X);
         R.initialize(Bibi, O, S, E, I, B, C, L, X);
-        I.initialize(Bibi, O, S, E, R, L);
+        I.initialize(Bibi, O, S, E, R, L, C);
     }
     { // Embedding, Window, Fullscreen
         O.Embedded = (() => { // Window Embedded or Not
